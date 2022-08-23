@@ -380,4 +380,10 @@
     [self.locationManager stopUpdatingHeading];
 }
 
+//requestAlwaysAuthorization
+- (void)getAlways:(CDVInvokedUrlCommand*)command
+{
+    [self.locationManager requestAlwaysAuthorization];    
+}
+
 @end
