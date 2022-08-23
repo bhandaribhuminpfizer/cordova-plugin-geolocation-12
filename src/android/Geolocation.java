@@ -20,6 +20,7 @@
 
 package org.apache.cordova.geolocation;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.Manifest;
 import android.os.Build;
@@ -31,12 +32,14 @@ import org.apache.cordova.PluginResult;
 import org.apache.cordova.LOG;
 import org.json.JSONArray;
 import org.json.JSONException;
+import android.location.LocationManager;
 
 
 public class Geolocation extends CordovaPlugin {
 
     String TAG = "GeolocationPlugin";
     CallbackContext context;
+    private LocationManager mLocationManager;
 
 
     String [] highAccuracyPermissions = { Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION };
@@ -48,6 +51,14 @@ public class Geolocation extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         LOG.d(TAG, "We are entering execute");
         context = callbackContext;
+
+        mLocationManager = (LocationManager) cordova.getActivity().getSystemService(Context.LOCATION_SERVICE);
+        if (isGPSdisabled()) {
+            PluginResult result = new PluginResult(PluginResult.Status.ILLEGAL_ACCESS_EXCEPTION, "Location services are disabled.");
+            context.sendPluginResult(result);
+            return false;
+        }
+
         if(action.equals("getPermission"))
         {
             boolean highAccuracy = args.getBoolean(0);
@@ -83,7 +94,7 @@ public class Geolocation extends CordovaPlugin {
                 String p = permissions[i];
                 if (r == PackageManager.PERMISSION_DENIED && arrayContains(permissionsToCheck, p)) {
                     LOG.d(TAG, "Permission Denied!");
-                    result = new PluginResult(PluginResult.Status.ILLEGAL_ACCESS_EXCEPTION);
+                    result = new PluginResult(PluginResult.Status.ILLEGAL_ACCESS_EXCEPTION, "");
                     context.sendPluginResult(result);
                     return;
                 }
@@ -104,6 +115,18 @@ public class Geolocation extends CordovaPlugin {
         }
         return true;
     }
+
+    private boolean isGPSdisabled() {
+		boolean gps_enabled;
+		try {
+			gps_enabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			gps_enabled = false;
+		}
+
+		return !gps_enabled;
+	}
 
     /*
      * We override this so that we can access the permissions variable, which no longer exists in
