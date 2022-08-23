@@ -120,11 +120,11 @@
     NSUInteger code = [CLLocationManager authorizationStatus];
     if (code == kCLAuthorizationStatusNotDetermined && ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)] || [self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])) { //iOS8+
         __highAccuracyEnabled = enableHighAccuracy;
-        if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"]){
-            [self.locationManager requestWhenInUseAuthorization];
-        } else if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"]) {
+        if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"]) {
             [self.locationManager  requestAlwaysAuthorization];
-        } else {
+        } else if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"]){
+            [self.locationManager requestWhenInUseAuthorization];
+        } else  {
             NSLog(@"[Warning] No NSLocationAlwaysUsageDescription or NSLocationWhenInUseUsageDescription key is defined in the Info.plist file.");
         }
         return;
